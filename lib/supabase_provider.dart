@@ -1,11 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, empty_catches
 
-
-
-
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_test/supabase_test_data.dart';
 
 
 class SupaBaseProvider extends ChangeNotifier {
@@ -105,6 +103,82 @@ class SupaBaseProvider extends ChangeNotifier {
     supabaseClient.auth.onAuthStateChange.listen((data) {
       user = data.session?.user;
     });
+  }
+
+  Future<SupabaseTestData?> addData({String? name, int? age}) async {
+    try {
+       isLoading = true;
+      if(user!=null) {
+       final result = await supabaseClient
+          .from('test')
+          .insert({'name': name, 'age': age}).select();
+        isLoading = false;
+       
+        return SupabaseTestData.fromJson(result.first);
+      }else{
+         isLoading = false;
+        return null;
+      }
+    } on Exception {
+      isLoading = false;
+      return null;
+    }
+  }
+
+  Future<SupabaseTestData?> updateData({String? id,String? name, int? age}) async {
+    try {
+       isLoading = true;
+      if(user!=null) {
+       final result = await supabaseClient
+          .from('test')
+          .update( {'name': name, 'age': age}).eq('id', id.toString()).select();
+        isLoading = false;
+        return SupabaseTestData.fromJson(result.first);
+      }else{
+         isLoading = false;
+        return null;
+      }
+    } on Exception {
+      isLoading = false;
+      return null;
+    }
+  }
+
+  Future<SupabaseTestData?> deleteData({String? id}) async {
+    try {
+       isLoading = true;
+      if(user!=null) {
+       final result = await supabaseClient
+          .from('test')
+          .delete().eq('id', id.toString()).select();
+        isLoading = false;
+        return SupabaseTestData.fromJson(result.first);
+      }else{
+         isLoading = false;
+        return null;
+      }
+    } on Exception {
+      isLoading = false;
+      return null;
+    }
+  }
+
+   Future<List<SupabaseTestData>?> getData() async {
+    try {
+       isLoading = true;
+      if(user!=null) {
+       final result = await supabaseClient
+          .from('test').select();
+        isLoading = false;
+        return result.map((e) => SupabaseTestData.fromJson(e)).toList();
+      }else{
+         isLoading = false;
+        return null;
+      }
+    } on Exception {
+      isLoading = false;
+      return null;
+    }
   }
 
  SnackBar snackBar(String value,bool isError) {
